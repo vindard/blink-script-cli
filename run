@@ -1,0 +1,15 @@
+#!/bin/bash
+
+source .env
+
+RESULTS_DIR="results"
+mkdir -p "$RESULTS_DIR"
+
+./helpers/exec_graphql 'wallet-ids' \
+    | jq '{walletIds: [.data.me.defaultAccount.wallets[].id]}' \
+    > "$RESULTS_DIR/.csv-transactions-input.json"
+
+./helpers/exec_graphql 'csv-transactions' \
+    | jq -r '.data.me.defaultAccount.csvTransactions' \
+    | base64 -d \
+    > "$RESULTS_DIR/transactions.csv"
