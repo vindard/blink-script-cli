@@ -1,0 +1,18 @@
+#!/bin/bash
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+source "$REPO_ROOT/.env"
+source "$REPO_ROOT/helpers/exec_graphql.bash"
+
+RESULTS_DIR="$REPO_ROOT/results"
+mkdir -p "$RESULTS_DIR"
+
+exec_graphql 'wallet-ids' \
+    | jq '{walletIds: [.data.me.defaultAccount.wallets[].id]}' \
+    > "$RESULTS_DIR/.csv-transactions-input.json"
+
+exec_graphql 'csv-transactions' \
+    | jq -r '.data.me.defaultAccount.csvTransactions' \
+    | base64 -d \
+    > "$RESULTS_DIR/transactions.csv"

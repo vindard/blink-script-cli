@@ -20,7 +20,7 @@ variables_file() {
   fi
 }
 
-exec_admin_graphql() {
+exec_graphql() {
   local query_name=$1
   local variables=$(variables_file "$1")
 
@@ -33,5 +33,3 @@ exec_admin_graphql() {
     -d "{\"query\": \"$(gql_query $query_name)\", \"variables\": $variables}" \
     "${GQL_ADMIN_ENDPOINT}"
 }
-
-exec_admin_graphql "$1"

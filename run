@@ -1,15 +1,43 @@
 #!/bin/bash
 
-source .env
+set -euo pipefail
 
-RESULTS_DIR="results"
-mkdir -p "$RESULTS_DIR"
+# Print usage information
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") <command> [options] [args]
 
-./helpers/exec_graphql 'wallet-ids' \
-    | jq '{walletIds: [.data.me.defaultAccount.wallets[].id]}' \
-    > "$RESULTS_DIR/.csv-transactions-input.json"
+Commands:
+  csv_transactions               Fetch csv transactions
+  help                           Show this help message
+EOF
+}
 
-./helpers/exec_graphql 'csv-transactions' \
-    | jq -r '.data.me.defaultAccount.csvTransactions' \
-    | base64 -d \
-    > "$RESULTS_DIR/transactions.csv"
+# Ensure at least one argument
+if (( $# < 1 )); then
+  usage
+  exit 1
+fi
+
+# Grab and consume the subcommand
+cmd=$1
+shift
+
+case "$cmd" in
+  csv_transactions)
+    # Example: ./run csv_transactions
+    ./cmds/csv_transactions
+    echo "> written to ./results/transactions.csv"
+    ;;
+
+  help|-h|--help)
+    usage
+    ;;
+
+  *)
+    echo "Error: Unknown command: '$cmd'" >&2
+    echo
+    usage
+    exit 1
+    ;;
+esac
